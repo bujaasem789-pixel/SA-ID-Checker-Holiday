@@ -1,0 +1,237 @@
+<template>
+    <div class="container">
+        <!-- Background Elements -->
+        <div class="background-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="header-content">
+                <div class="icon-wrapper">
+                    <lightning-icon icon-name="custom:custom14" alternative-text="SA ID Checker" size="large"></lightning-icon>
+                </div>
+                <h1 class="main-title">SA ID Holiday Checker</h1>
+                <p class="subtitle">Discover public holidays for your birth year by entering your South African ID number</p>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <div class="card-content">
+                <!-- Info Section -->
+                <div class="info-section">
+                    <div class="info-card">
+                        <lightning-icon icon-name="utility:info" alternative-text="Information" size="small"></lightning-icon>
+                        <div class="info-text">
+                            <h3>How it works</h3>
+                            <p>Enter your 13-digit South African ID number to validate it and discover all public holidays that occurred in your birth year. Your search is securely stored and tracked.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Section -->
+                <div class="input-section">
+                    <div class="input-container">
+                        <label for="idInput" class="input-label">South African ID Number</label>
+                        <div class="input-wrapper">
+                            <input
+                                id="idInput"
+                                type="text"
+                                class={inputClass}
+                                placeholder="Enter your 13-digit SA ID number"
+                                value={idNumber}
+                                maxlength="17"
+                                oninput={handleInputChange}
+                                onkeydown={handleKeyDown}
+                            />
+                            <div class="input-icon">
+                                <template if:true={isValidating}>
+                                    <div class="spinner-small"></div>
+                                </template>
+                                <template if:false={isValidating}>
+                                    <template if:true={showValidIcon}>
+                                        <lightning-icon icon-name="utility:check" alternative-text="Valid" size="x-small"></lightning-icon>
+                                    </template>
+                                    <template if:true={showInvalidIcon}>
+                                        <lightning-icon icon-name="utility:close" alternative-text="Invalid" size="x-small"></lightning-icon>
+                                    </template>
+                                </template>
+                            </div>
+                        </div>
+                        
+                        <!-- Validation Message -->
+                        <template if:true={validationMessage}>
+                            <div class={validationMessageClass}>
+                                {validationMessage}
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Search Button -->
+                    <div class="button-container">
+                        <button 
+                            class={searchButtonClass}
+                            onclick={handleSearch}
+                            disabled={isSearchDisabled}
+                        >
+                            <template if:true={isSearching}>
+                                <div class="button-spinner"></div>
+                                <span>Searching...</span>
+                            </template>
+                            <template if:false={isSearching}>
+                                <lightning-icon icon-name="utility:search" alternative-text="Search" size="x-small"></lightning-icon>
+                                <span>Find Holidays</span>
+                            </template>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <template if:true={hasResults}>
+                    <div class="results-section fade-in">
+                        <!-- ID Details Card -->
+                        <div class="result-card id-details-card">
+                            <div class="card-header">
+                                <lightning-icon icon-name="utility:identity" alternative-text="ID Details" size="small"></lightning-icon>
+                                <h3>ID Information</h3>
+                                <div class="search-count">
+                                    <span class="count-label">Searches:</span>
+                                    <span class="count-value">{searchCount}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="id-details-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">ID Number:</span>
+                                        <span class="detail-value id-number">{formattedIdNumber}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Date of Birth:</span>
+                                        <span class="detail-value">{formattedDateOfBirth}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Gender:</span>
+                                        <span class="detail-value">
+                                            <span class={genderBadgeClass}>{idDetails.gender}</span>
+                                        </span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Citizenship:</span>
+                                        <span class="detail-value">
+                                            <span class={citizenshipBadgeClass}>
+                                                {citizenshipText}
+                                            </span>
+                                        </span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Birth Year:</span>
+                                        <span class="detail-value birth-year">{idDetails.birthYear}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Holidays Section -->
+                        <template if:true={holidayResponse.success}>
+                            <div class="result-card holidays-card">
+                                <div class="card-header">
+                                    <lightning-icon icon-name="utility:event" alternative-text="Holidays" size="small"></lightning-icon>
+                                    <h3>Public Holidays in {idDetails.birthYear}</h3>
+                                    <div class="holiday-count">
+                                        <span class="count-value">{holidayCount} holidays</span>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Birth Date Holidays -->
+                                    <template if:true={hasHolidaysOnBirthDate}>
+                                        <div class="special-section">
+                                            <div class="special-header">
+                                                <lightning-icon icon-name="utility:cake" alternative-text="Birthday" size="x-small"></lightning-icon>
+                                                <span>Holidays on your birthday! 🎉</span>
+                                            </div>
+                                            <template for:each={holidaysOnBirthDate} for:item="holiday">
+                                                <div key={holiday.name} class="holiday-item birthday-holiday">
+                                                    <div class="holiday-main">
+                                                        <span class="holiday-name">{holiday.name}</span>
+                                                        <span class="holiday-date">{holiday.date}</span>
+                                                    </div>
+                                                    <template if:true={holiday.description}>
+                                                        <p class="holiday-description">{holiday.description}</p>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- All Holidays -->
+                                    <div class="holidays-grid">
+                                        <template for:each={holidayResponse.holidays} for:item="holiday">
+                                            <div key={holiday.name} class="holiday-item">
+                                                <div class="holiday-main">
+                                                    <span class="holiday-name">{holiday.name}</span>
+                                                    <span class="holiday-date">{holiday.holidayDate}</span>
+                                                </div>
+                                                <template if:true={holiday.description}>
+                                                    <p class="holiday-description">{holiday.description}</p>
+                                                </template>
+                                                <div class="holiday-type">
+                                                    <span class="type-badge">{holiday.holidayType}</span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Holiday API Error -->
+                        <template if:false={holidayResponse.success}>
+                            <template if:true={holidayResponse.errorMessage}>
+                                <div class="result-card error-card">
+                                    <div class="card-header">
+                                        <lightning-icon icon-name="utility:warning" alternative-text="Warning" size="small"></lightning-icon>
+                                        <h3>Holiday Information Unavailable</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="error-message">{holidayResponse.errorMessage}</p>
+                                        <button class="retry-button" onclick={handleRetryHolidays} disabled={isRetryingHolidays}>
+                                            <template if:true={isRetryingHolidays}>
+                                                <div class="button-spinner"></div>
+                                                <span>Loading...</span>
+                                            </template>
+                                            <template if:false={isRetryingHolidays}>
+                                                <lightning-icon icon-name="utility:refresh" alternative-text="Retry" size="x-small"></lightning-icon>
+                                                Retry
+                                            </template>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Error Section -->
+                <template if:true={hasError}>
+                    <div class="error-section fade-in">
+                        <div class="error-card">
+                            <lightning-icon icon-name="utility:error" alternative-text="Error" size="small"></lightning-icon>
+                            <div class="error-content">
+                                <h3>Validation Error</h3>
+                                <p>{errorMessage}</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p></p>
+        </div>
+    </div>
+</template>
