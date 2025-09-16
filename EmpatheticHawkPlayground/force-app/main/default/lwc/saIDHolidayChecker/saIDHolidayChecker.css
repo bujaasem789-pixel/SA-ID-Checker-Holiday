@@ -40,6 +40,10 @@
     font-weight: 400;
 }
 
+.centered-text {
+    text-align: center;
+}
+
 /* Main Card */
 .main-card {
     max-width: 88%;
