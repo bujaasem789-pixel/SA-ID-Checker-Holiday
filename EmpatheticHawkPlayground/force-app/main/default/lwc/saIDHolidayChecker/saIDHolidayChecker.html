@@ -150,7 +150,7 @@
                                         <div class="special-section">
                                             <div class="special-header">
                                                 <lightning-icon icon-name="utility:cake" alternative-text="Birthday" size="x-small"></lightning-icon>
-                                                <span>Holidays on your birthday! 🎉</span>
+                                                <span>Holidays on your birthday!</span>
                                             </div>
                                             <template for:each={holidaysOnBirthDate} for:item="holiday">
                                                 <div key={holiday.name} class="holiday-item birthday-holiday">
@@ -163,6 +163,23 @@
                                                     </template>
                                                 </div>
                                             </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- No Birthday Holiday Message -->
+                                    <template if:false={hasHolidaysOnBirthDate}>
+                                        <div class="special-section no-birthday-holiday">
+                                            <div class="special-header">
+                                                <lightning-icon icon-name="utility:date_time" alternative-text="Calendar" size="x-small"></lightning-icon>
+                                                <span>Birthday Holiday Status</span>
+                                            </div>
+                                            <div class="no-holiday-message">
+                                                <p class="no-holiday-text">
+                                                    While there weren't any public holidays on your exact birthday in {idDetails.birthYear}, 
+                                                    that just means you had your special day all to yourself! Check out all the other 
+                                                    exciting holidays that happened during your birth year below.
+                                                </p>
+                                            </div>
                                         </div>
                                     </template>
 
