@@ -436,6 +436,24 @@
     justify-content: flex-end;
 }
 
+.no-birthday-holiday {
+    background-color: #f8f9fa;
+    border-left: 4px solid #0176d3;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.no-holiday-message {
+    margin-top: 0.5rem;
+}
+
+.no-holiday-text {
+    color: #3e3e3c;
+    font-style: italic;
+    margin: 0;
+}
+
 .type-badge {
     background: #e9ecef;
     color: #495057;
